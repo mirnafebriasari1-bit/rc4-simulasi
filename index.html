@@ -161,10 +161,10 @@ function draw(){
  }else{
   const enc=page==10,a=fr?fr-1:-1,hi=a>=0?[a]:[];
   const R=(enc?C:P).map((x,n)=>n<fr?x:''),L=enc?P:C;
-  const fL=enc?(x=>ch(x)):(x=>x),fR=x=>asc?ch(x)||'·':x;
+  const fL=enc?(x=>ch(x)):(x=>x),fR=x=>asc||!enc?ch(x)||'·':x;
   h=pn('Permuted State Vector, S',row('b0',SF,-1,x=>x))+pn('Pseudo random keystream,K',row('b1',K,a,x=>x,hi))+`<div class="xo"></div>`+
    pn(enc?'Plaintext stream, P':'Ciphertext stream, C',row('c0',L,a,fL,hi))+`<div class="da"></div>`+
-   pn(enc?'Ciphertext stream, C':'Plaintext stream, P',row('c1',R,a,x=>x===''?'':fR(x),hi)+`<label class="ck"><input type="checkbox" ${asc?'checked':''} onchange="asc=this.checked;draw()">ASCII code/character</label>`)+ctl();
+   pn(enc?'Ciphertext stream, C':'Plaintext stream, P',row('c1',R,a,x=>x===''?'':fR(x),hi)+`<label class="ck" style="${enc?'':'display:none'}"><input type="checkbox" ${asc?'checked':''} onchange="asc=this.checked;draw()">ASCII code/character</label>`)+ctl();
   if(fr==P.length)msg=enc?'Ciphertext (hex): '+hx(C):'Hasil dekripsi: '+String.fromCharCode(...C.map((c,n)=>c^K[n]))+(C.every((c,n)=>(c^K[n])==P[n])?'  ✓ sama dengan plaintext asli':'');
  }
  if(page>=8)h+=det();const af=document.activeElement&&document.activeElement.id=='fq';$('bd').innerHTML=h+(msg?`<div class="msg">${msg}</div>`:'');
