@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RC4</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:#3a3a3a;font-family:Verdana,Tahoma,Arial,sans-serif;color:#111}
+.app{max-width:700px;margin:0 auto;min-height:560px;background:linear-gradient(#8ba483,#bccbb6);border-top:6px solid #2d2d2d;display:flex;flex-direction:column}
+.hd{height:56px;background:linear-gradient(#80997a,#8ba483);position:relative;display:flex;align-items:center;padding:0 14px}
+.hd .ph{font-weight:bold;font-size:17px;margin-top:28px;color:#14200f}
+.hd .ti{position:absolute;left:0;right:0;text-align:center;color:#fff;font-weight:bold;font-size:21px;pointer-events:none}
+.ic{position:absolute;right:12px;top:6px;display:flex;gap:3px}
+.ic i{width:24px;height:24px;border-radius:50%;background:#4f8d4a;border:2px solid #cfe5cb;color:#fff;font:bold 13px/20px Arial;text-align:center;font-style:normal}
+.bd{flex:1;padding:8px 22px 10px;position:relative}
+.pn{background:#d6d6d6;border:1px solid #8d8d8d;padding:6px 8px 8px}
+.pn+.pn{border-top:none}
+.pn h4{margin:0 0 7px;text-align:center;font-weight:normal;font-size:13px;color:#333}
+.rw,.ar{display:grid;gap:6px}
+.c{background:#fff;border:1px solid #444;border-radius:3px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:clamp(11px,2.6vw,16px);position:relative;min-width:0;overflow:hidden}
+.c.hi{background:#ffe98a}
+.c.mid{cursor:pointer}
+.c.l:hover::after,.c.r:hover::after{position:absolute;inset:0;background:#bcd9f5;display:flex;align-items:center;justify-content:center}
+.c.l:hover::after{content:"<<"}.c.r:hover::after{content:">>"}
+.ar{height:22px;margin-bottom:2px}
+.ar b{color:#ee2a1f;font-size:20px;line-height:22px;text-align:center;font-weight:normal}
+.lo{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;align-items:flex-start}
+.pc{width:200px;font-size:10px;line-height:1.55;font-weight:bold}
+.pc div{font-weight:normal;font-size:9.5px;white-space:nowrap;padding:0 2px}
+.pc div.h{background:#5a3d93;color:#fff;display:inline-block}
+.pt{display:flex;gap:24px;flex-wrap:wrap;margin-left:10px}
+.pt p{margin:0;font-size:11px;text-align:center}
+.pt .bx{display:flex;align-items:center;font-size:24px;margin-top:3px}
+.pt .bx span{background:#fff;border:2px solid #333;min-width:62px;height:46px;font-size:21px;line-height:42px;text-align:center;margin-left:2px}
+.xo{width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid #e23b2e;margin:10px auto;position:relative}
+.xo::before,.xo::after{content:"";position:absolute;background:#e23b2e}
+.xo::before{left:50%;top:3px;bottom:3px;width:2px;margin-left:-1px}
+.xo::after{top:50%;left:3px;right:3px;height:2px;margin-top:-1px}
+.da{width:34px;height:28px;margin:6px auto;background:#fff;clip-path:polygon(30% 0,70% 0,70% 50%,100% 50%,50% 100%,0 50%,30% 50%)}
+.ck{font-size:9px;margin-top:5px;display:flex;align-items:center;gap:3px}.ck input{width:11px;height:11px;margin:0}
+.ctl{display:flex;gap:5px;align-items:center;flex-wrap:wrap;margin-top:10px;font-size:11px}
+.ctl button{background:#f2f2f2;border:1px solid #666;border-radius:3px;padding:3px 9px;cursor:pointer;font-size:12px}
+.msg{font-weight:bold;color:#1c3d17;font-size:12px;margin-top:6px;word-break:break-all;min-height:16px}
+.tx{padding:10px 14px;font-size:14px;line-height:1.7}
+.tx code{background:#fff;padding:1px 5px;border:1px solid #999}
+.fr{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.fr label{width:70px;font-weight:bold;font-size:12px}
+.fr input{flex:1;min-width:0;padding:6px;font:14px Verdana;border:1px solid #777;background:#fff}
+.go{background:linear-gradient(#e6e6e6,#c4c4c4);border:1px solid #888;padding:5px 40px;font:bold 11px Verdana;cursor:pointer}
+.er{color:#a00;font-size:12px;font-weight:bold;min-height:16px;margin:2px 0 4px 82px}
+.sh{display:flex;align-items:center;gap:14px;margin-top:34px}
+.sh .lb{width:92px;font-weight:bold;font-size:17px}
+.bar{flex:1;background:#cfcfcf;min-height:46px;display:flex;gap:4px;padding:5px;overflow-x:auto}
+.bar .c{width:34px;min-width:34px;height:36px}
+.ov{position:absolute;left:50%;top:130px;transform:translateX(-50%);background:rgba(0,0,0,.84);color:#e32;padding:12px 20px;border-radius:4px;text-align:center;font-weight:bold;font-size:17px;z-index:5;min-width:190px}
+.ov .ob{margin-top:8px;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap}
+.ov i{display:inline-block;background:#fff;color:#111;border:1px solid #444;min-width:42px;padding:6px 4px;font-style:normal}
+.st{background:linear-gradient(#6a8196,#33485b);color:#fff;border:1px solid #9ab;padding:8px 40px;font:bold 15px Verdana;cursor:pointer;border-radius:3px}
+.ft{height:44px;background:linear-gradient(#58784f,#3f5c38);display:flex;align-items:center;justify-content:space-between;padding:0 18px;color:#fff;font-size:11px;font-weight:bold}
+.ft .bt{display:flex;gap:70px}
+.bn{background:linear-gradient(#4bb13e,#2e7d28);color:#dff5d8;border:1px solid #1e5a1a;border-radius:14px;padding:5px 16px;font:bold 11px Verdana;cursor:pointer;min-width:90px}
+.bn:disabled{opacity:.3;cursor:default}
+.dp{margin-top:10px}.ds{font-size:12px;line-height:1.7;background:#fff;border:1px solid #888;padding:6px 8px;margin:6px 0}.ds code{font-size:12px}.lg{font-size:10px;margin-bottom:4px}
+.sg{display:grid;grid-template-columns:repeat(16,1fr);gap:2px}.sg span{background:#fff;border:1px solid #888;font-size:10px;text-align:center;padding:2px 0}.sg .ha{background:#ffe98a;font-weight:bold}.sg .hb{background:#f5a86b;font-weight:bold}.sg small{display:block;font-size:8px;font-weight:normal;color:#777;line-height:1.1}.sg .ha small,.sg .hb small{color:#222}
+.tbw{max-height:170px;overflow:auto;background:#fff;border:1px solid #888}.dt{width:100%;border-collapse:collapse;font-size:11px;text-align:center}.dt th{position:sticky;top:0;background:#bbb}.dt td,.dt th{padding:2px 4px;border-bottom:1px solid #ddd}.bt{width:auto;margin:6px 0}.bt th{position:static;background:none;text-align:right;padding-right:8px;white-space:nowrap}.bt td{width:26px;font-family:monospace;font-size:14px;border:1px solid #bbb}.bt .b1{background:#ffe98a;font-weight:bold}
+@media(max-width:520px){.bd{padding:8px}.ft .bt{gap:14px}.pc{width:100%}.sh .lb{width:60px;font-size:13px}}
+</style></head><body>
+<div class="app">
+ <div class="hd"><span class="ph" id="ph"></span><span class="ti">RC4</span><div class="ic"><i>⌂</i><i>✕</i><i>?</i></div></div>
+ <div class="bd" id="bd"></div>
+ <div class="ft"><span id="pg"></span><span class="bt"><button class="bn" id="pv" onclick="nav(-1)">◀ Previous</button><button class="bn" id="nx" onclick="nav(1)">Next ▶</button></span><span id="tm"></span></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const NAME=['Introduction','Stream Cipher','KSA Overview','PRGA Overview','Encryption Overview','Inputs','Vector Initialisation','KSA','PRGA','Encryption','Decryption'];
+let page=1,fr=0,pl=false,tmo=null,sp=40,t0=Date.now(),sc={},asc=false,keyV='KEY',ptV='HELLO WORLD!',goDone=false,kst='init';
+let KF,PF,S0,T,P,K,C,SF,TL;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const ch=c=>c>=33&&c<127?esc(String.fromCharCode(c)):c==32?'':'·';
+const hx=a=>a.map(x=>x.toString(16).padStart(2,'0')).join(' ');
+function comp(){
+ const kb=[...keyV].map(c=>c.charCodeAt(0));P=[...ptV].map(c=>c.charCodeAt(0));
+ T=[...Array(256)].map((_,i)=>kb[i%kb.length]);
+ let S=[...Array(256).keys()],j=0;S0=S.slice();KF=[{S:S.slice(),j:0}];
+ for(let i=0;i<256;i++){j=(j+S[i]+T[i])%256;[S[i],S[j]]=[S[j],S[i]];KF.push({S:S.slice(),j})}
+ SF=S.slice();let i=0;j=0;K=[];PF=[{S:S.slice(),i:0,j:0,hi:[]}];
+ for(let n=0;n<P.length;n++){i=(i+1)%256;j=(j+S[i])%256;[S[i],S[j]]=[S[j],S[i]];K.push(S[(S[i]+S[j])%256]);PF.push({S:S.slice(),i,j,hi:[i,j]})}
+ C=P.map((p,n)=>p^K[n]);sc={};
+ TL=[];for(let it=0;it<256;it++){if(it<3)[0,1,2,3].forEach(ph=>TL.push({it,ph}));else TL.push({it,ph:3})}
+}
+function row(id,arr,ar,f,hi){
+ hi=hi||[];const n=arr.length,w=sc[id]??-1,mid=n>7;let cs=[];
+ const add=ix=>cs.push({v:f(arr[ix]),h:hi.includes(ix),ix});
+ if(!mid)for(let k=0;k<n;k++)add(k);
+ else{for(let k=0;k<6;k++)add(k);
+  for(let k=0;k<5;k++){const ix=6+w+k;if(w>=0&&ix<n-1)add(ix);else cs.push({v:'…',h:false,ix:-1})}
+  add(n-1)}
+ const dot=cs.findIndex((c,k)=>k>=6&&k<=10&&c.ix<0);
+ if(mid&&dot>=0&&hi.some(x=>x>=6&&x<n-1&&!cs.some(c=>c.ix==x)))cs[dot].h=true;
+ let col=ar>=0?cs.findIndex(c=>c.ix==ar):-1;if(ar>=0&&col<0)col=dot;
+ const g=`grid-template-columns:repeat(${cs.length},1fr)`;
+ return `<div class="ar" style="${g}">`+cs.map((_,k)=>`<b>${k==col?'▼':''}</b>`).join('')+`</div><div class="rw" style="${g}">`+
+  cs.map((c,k)=>{const md=mid&&k>=6&&k<=10;
+   const oc=md&&k==6?`onclick="sx('${id}',-1,${n})"`:md&&k==10?`onclick="sx('${id}',1,${n})"`:'';
+   return `<div class="c${c.h?' hi':''}${md?' mid':''}${md&&k==6?' l':''}${md&&k==10?' r':''}" ${oc}>${c.v}</div>`}).join('')+`</div>`;
+}
+function sx(id,d,n){let w=sc[id]??-1;const mx=Math.floor((n-8)/5)*5;
+ if(w<0)w=d>0?0:-1;else{w+=d*5;if(w<0)w=-1;if(w>mx)w=mx}sc[id]=w;draw()}
+const pn=(t,b)=>`<div class="pn"><h4>${t}</h4>${b}</div>`;
+const KSC=['j=0','for i from 0 to 255','j=(j+S[i]+T[i]) mod 256','Swap (S[i], S[j])','endfor'];
+const VIC=['for i from 0 to 255','S[i] = i','T[i] = K[i mod keylen]','endfor'];
+const PRC=['i=0','j=0','plen= length[Plaintext]','while (plen&gt;0)','i=(i+1) mod 256','j=(j+S[i]) mod 256','Swap (S[i], S[j])','k=S[(S[i]+S[j]) mod 256]','Output k','plen=plen-1','endwhile'];
+const code=(l,h)=>`<div class="pc">Pseudocode`+l.map((x,k)=>`<div class="${k==h?'h':''}">${x}</div>`).join('')+`</div>`;
+const box=(l,v,lab)=>`<p>${lab}<span class="bx"><b style="font-weight:normal">${l}=</b><span>${v}</span></span></p>`;
+const cells=s=>[...s].map(c=>`<div class="c">${c==' '?'':esc(c)}</div>`).join('');
+const TXT=[
+ ['Pengantar RC4','<b>RC4</b> (Rivest Cipher 4) adalah <i>stream cipher</i>: data diproses byte demi byte memakai aliran kunci (<i>keystream</i>) pseudo-acak. Simulasi ini memperlihatkan seluruh proses secara bergerak: <b>Vector Initialisation</b>, <b>KSA</b>, <b>PRGA</b>, <b>Enkripsi</b>, dan <b>Dekripsi</b>.'],
+ ['Stream Cipher','Setiap karakter plaintext diubah menjadi kode ASCII, lalu di-<b>XOR</b> dengan satu byte keystream.<br><br><code>C = P XOR K</code> &nbsp; dan &nbsp; <code>P = C XOR K</code><br><br>Karena XOR dibalik dengan XOR yang sama, proses dekripsi sama persis dengan enkripsi.'],
+ ['KSA – Key Scheduling Algorithm','Vektor <b>S</b> berisi 0–255. Kunci diulang sampai 256 byte membentuk vektor <b>T</b>. Lalu S diacak:<br><code>j = (j + S[i] + T[i]) mod 256</code><br><code>swap(S[i], S[j])</code> untuk i = 0 … 255.'],
+ ['PRGA – Pseudo-Random Generation','S yang sudah teracak dipakai untuk menghasilkan keystream, satu byte untuk tiap karakter plaintext:<br><code>i = (i+1) mod 256</code><br><code>j = (j+S[i]) mod 256</code>; swap(S[i], S[j])<br><code>k = S[(S[i]+S[j]) mod 256]</code>'],
+ ['Enkripsi dan Dekripsi','Enkripsi: setiap P di-XOR dengan K menjadi C. Dekripsi: setiap C di-XOR dengan K yang sama untuk mendapatkan P kembali. Kunci yang sama menghasilkan keystream yang sama.']];
+function maxF(){return page==7?256:page==8?TL.length:P.length}
+function ctl(){return `<div class="ctl"><button onclick="rs()">⏮</button><button onclick="stp(-1)">◀</button><button onclick="tp()">${pl?'⏸':'▶'}</button><button onclick="stp(1)">▶|</button><button onclick="en()">⏭</button> Kecepatan <select onchange="sp=+this.value"><option value="120"${sp==120?' selected':''}>Lambat</option><option value="40"${sp==40?' selected':''}>Normal</option><option value="8"${sp==8?' selected':''}>Cepat</option></select></div>`}
+function draw(){
+ $('ph').textContent=NAME[page-1];$('pg').textContent=`Page   ${page} / 11`;
+ $('pv').disabled=page==1||pl||(page==8&&kst=='init');
+ $('nx').disabled=page==11||pl||(page==6&&!goDone)||(page==7&&fr<256)||(page==8&&fr<TL.length);tick();
+ let h='',msg='';
+ if(page<=5)h=pn(TXT[page-1][0],`<div class="tx">${TXT[page-1][1]}</div>`);
+ else if(page==6){
+  h=`<div class="fr"><label>Key (K)</label><input id="k" value="${esc(keyV)}" oninput="dirty()"></div><div class="fr"><label>Plaintext</label><input id="p" value="${esc(ptV)}" oninput="dirty()"></div><div class="er" id="er"></div><div style="text-align:right"><button class="go" onclick="go()">GO</button></div>`+
+   `<div class="sh"><span class="lb">Key (K)</span><div class="bar">${goDone?cells(keyV):''}</div></div><div class="sh"><span class="lb">Plaintext</span><div class="bar">${goDone?cells(ptV):''}</div></div>`;
+ }else if(page==7){
+  const i=fr-1,fS=S0.map((x,n)=>n<=i?x:''),fT=T.map((x,n)=>n<=i?String.fromCharCode(x):''),kl=keyV.length;
+  h=pn('Initial State Vector, S',row('a0',fS,i,x=>x,i>=0?[i]:[]))+pn('Temporary Vector, T',row('a1',fT,i,x=>x==' '?'␣':esc(x),i>=0?[i]:[]))+
+   `<div class="lo">${code(VIC,fr==256?3:fr?(fr%2?1:2):0)}<div class="pt">${box('i',Math.max(i,0),'index pointer,i')}</div></div>`+
+   `<div style="margin-top:14px;font-size:11px">Key (K)</div><div class="bar" style="margin-top:4px">${[...keyV].map((c,n)=>`<div class="c${i>=0&&n==i%kl?' hi':''}">${c==' '?'':esc(c)}</div>`).join('')}</div>`+ctl();
+ }else if(page==8){
+  const e=fr?TL[fr-1]:null,it=e?e.it:-1,ph=e?e.ph:3,run=kst=='run'&&fr>0;
+  const Sb=it>=0?KF[it].S:S0,Sa=it>=0?KF[it+1].S:S0,jo=it>=0?KF[it].j:0,jn=it>=0?KF[it+1].j:0;
+  let Sp=ph==3?Sa:Sb,ar=it>=0?(ph==3?jn:jo):255,ai=it>=0?it:255,hi=[];
+  if(kst=='init')Sp=S0.map((x,n)=>n<3?x:'');
+  if(run&&ph==3)hi=[it,jn];
+  let ov='';
+  if(kst=='init')ov='<div class="ov">Initializing…</div>';
+  else if(kst=='ready')ov='<div class="ov"><button class="st" onclick="startK()">Start</button></div>';
+  else if(run&&ph==1){const sm=jo+Sb[it]+T[it];ov=`<div class="ov">ADD(+)<div class="ob"><i>${jo}</i>+<i>${Sb[it]}</i>+<i>${T[it]}</i>=<i>${sm}</i></div></div>`}
+  else if(run&&ph==2){const sm=jo+Sb[it]+T[it];ov=`<div class="ov">Mod (%) 256<div class="ob"><i>${sm}</i> mod <i>256</i> = <i>${sm%256}</i></div></div>`}
+  h=pn('Initial State Vector, S',row('a0',S0,kst=='init'?-1:ai,x=>x,run?[it]:[]))+
+   pn('Temporary Vector, T',row('a1',T,kst=='init'?-1:ai,x=>x==32?'␣':ch(x)||'·',run?[it]:[]))+
+   pn('Permuted State Vector, S',row('a2',Sp,kst=='init'?-1:ar,x=>x,hi))+
+   `<div class="lo">${code(KSC,fr>=TL.length?4:!run?0:ph==0?1:ph==3?3:2)}<div class="pt">${box('i',Math.max(it,0),'index pointer,i')}${box('j',run&&ph==3?jn:run?jo:0,'index pointer,j')}</div></div>`+ov+(run?ctl():'');
+  if(fr>=TL.length)msg='KSA selesai: S sudah teracak oleh kunci.';
+ }else if(page==9){
+  const s=PF[fr],d=fr==P.length,kk=K.map((x,n)=>n<fr?x:'');
+  h=pn('Permuted State Vector, S',row('b0',s.S,fr?s.i:-1,x=>x,s.hi))+
+   pn('Pseudo random keystream,K',row('b1',kk,fr?fr-1:-1,x=>x,fr?[fr-1]:[]))+
+   `<div class="lo">${code(PRC,d?10:fr?6:2)}<div class="pt">${box('i',s.i,'index pointer,i')}${box('j',s.j,'index pointer,j')}${box('plen',P.length-fr,'counter, plen')}</div></div>`+ctl();
+  if(d)msg='Keystream K: '+hx(K);
+ }else{
+  const enc=page==10,a=fr?fr-1:-1,hi=a>=0?[a]:[];
+  const R=(enc?C:P).map((x,n)=>n<fr?x:''),L=enc?P:C;
+  const fL=enc?(x=>ch(x)):(x=>x),fR=x=>asc?ch(x)||'·':x;
+  h=pn('Permuted State Vector, S',row('b0',SF,-1,x=>x))+pn('Pseudo random keystream,K',row('b1',K,a,x=>x,hi))+`<div class="xo"></div>`+
+   pn(enc?'Plaintext stream, P':'Ciphertext stream, C',row('c0',L,a,fL,hi))+`<div class="da"></div>`+
+   pn(enc?'Ciphertext stream, C':'Plaintext stream, P',row('c1',R,a,x=>x===''?'':fR(x),hi)+`<label class="ck"><input type="checkbox" ${asc?'checked':''} onchange="asc=this.checked;draw()">ASCII code/character</label>`)+ctl();
+  if(fr==P.length)msg=enc?'Ciphertext (hex): '+hx(C):'Hasil dekripsi: '+String.fromCharCode(...C.map((c,n)=>c^K[n]))+(C.every((c,n)=>(c^K[n])==P[n])?'  ✓ sama dengan plaintext asli':'');
+ }
+ if(page>=8)h+=det();const af=document.activeElement&&document.activeElement.id=='fq';$('bd').innerHTML=h+(msg?`<div class="msg">${msg}</div>`:'');
+ const tb=document.querySelector('.tbw');if(tb&&!fq)tb.scrollTop=tb.scrollHeight;if(af){const q=$('fq');q.focus();q.setSelectionRange(q.value.length,q.value.length)}
+}
+let fq='';function fs(v){fq=''+v;draw()}
+function ksf(r){
+ const q=fq.trim(),H=['i','j lama','T[i]','j baru','S[i] sebelum swap','S[j] sebelum swap','S[i] sesudah swap','S[j] sesudah swap'];
+ let rows=r,sm='',p=-1,li=-1;
+ if(q!==''){
+  if(!/^\d+$/.test(q)||+q>255)sm='Masukkan nomor laci 0–255.';
+  else{p=+q;rows=r.filter(x=>x[0]==p||x[3]==p);li=rows.length-1;
+   if(li<0)sm=`Laci <b>${p}</b> belum pernah ditukar sampai iterasi ini, isinya masih <b>${p}</b>.`;
+   else{const l=rows[li],jj=l[3]==p;sm=`Laci <b>${p}</b>: baris terakhir i=${l[0]}, nomor laci ada di kolom <b>${jj?'j baru':'i'}</b>, jadi ambil S[${jj?'j':'i'}] sesudah swap = <b>${jj?l[7]:l[6]}</b>. Total ${rows.length} baris (baris terakhir berwarna kuning).`}}}
+ return `<div style="margin:6px 0;font-size:12px">Cari nomor laci (0–255): <input id="fq" value="${esc(fq)}" oninput="fs(this.value)" inputmode="numeric" style="width:70px;padding:3px"> <button class="go" style="padding:2px 12px" onclick="fs('')">Reset</button></div>${sm?`<div class="ds">${sm}</div>`:''}<div class="tbw"><table class="dt"><tr>${H.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map((x,k)=>`<tr${k==li?' style="background:#ffe98a"':''}>${x.map((y,c)=>`<td>${p>=0&&(c==0||c==3)&&y==p?`<b>${y}</b>`:y}</td>`).join('')}</tr>`).join('')}</table></div>`;
+}
+const bin=x=>x.toString(2).padStart(8,'0'),cc=x=>ch(x)||'␣';
+const sg=(S,a,b)=>`<div class="lg">Kuning = i, oranye = j${page==8?' • klik sel untuk mencari laci itu':''} (angka kecil = nomor laci, angka besar = isinya; seluruh 256 isi S, 16×16)</div><div class="sg">`+S.map((v,n)=>`<span class="${n==a?'ha':n==b?'hb':''}" title="S[${n}]"${page==8?` onclick="fs(${n})" style="cursor:pointer"`:''}><small>${n}</small>${v}</span>`).join('')+`</div>`;
+const tbl=(h,r)=>`<div class="tbw"><table class="dt"><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(y=>`<td>${y}</td>`).join('')}</tr>`).join('')}</table></div>`;
+const bt=(A,B,enc)=>{const R=A^B,row=(l,v,h)=>`<tr><th>${l}</th>${[...bin(v)].map(x=>`<td${h&&x=='1'?' class="b1"':''}>${x}</td>`).join('')}</tr>`;return `<table class="dt bt">${row((enc?'P':'C')+' ('+A+')',A)}${row('K ('+B+')',B)}${row('XOR ('+R+')',R,1)}</table><div class="lg">Bit sama (0 dan 0, atau 1 dan 1) → hasil 0. Bit beda → hasil 1 (sel kuning).</div>`};
+function det(){
+ let g='',t='',tb='';
+ if(page==8){
+  const e=fr?TL[fr-1]:null;if(kst!='run'||!e)return '';
+  const it=e.it,Sb=KF[it].S,jo=KF[it].j,jn=KF[it+1].j,sm=jo+Sb[it]+T[it];
+  t=`<b>Iterasi i=${it}</b><br>j = (${jo} + S[${it}]=${Sb[it]} + T[${it}]=${T[it]}) mod 256 = ${sm} mod 256 = <b>${jn}</b><br>Swap S[${it}]=${Sb[it]} ⇄ S[${jn}]=${Sb[jn]}`+(jn==it?' (i = j, tidak berubah)':'');
+  g=sg(e.ph==3?KF[it+1].S:Sb,it,jn);
+  const r=[];for(let n=0;n<=it;n++){const jn=KF[n+1].j;r.push([n,KF[n].j,T[n],jn,KF[n].S[n],KF[n].S[jn],KF[n+1].S[n],KF[n+1].S[jn]])}
+  tb=ksf(r);
+ }else if(page==9){
+  if(!fr)return '';
+  const pv=PF[fr-1],s=PF[fr],i=s.i,j=s.j,Si=s.S[i],Sj=s.S[j],tt=(Si+Sj)%256;
+  t=`<b>Langkah ${fr}</b><br>i = ${pv.i}+1 = ${i}<br>j = (${pv.j} + S[${i}]=${pv.S[i]}) mod 256 = <b>${j}</b><br>Swap S[${i}]=${pv.S[i]} ⇄ S[${j}]=${pv.S[j]}<br>t = (S[${i}] + S[${j}]) mod 256 = (${Si} + ${Sj}) mod 256 = ${tt} → K = S[${tt}] = <b>${K[fr-1]}</b>`;
+  g=sg(s.S,i,j);
+  const r=[];for(let n=1;n<=fr;n++){const q=PF[n];r.push([n,q.i,q.j,q.S[q.i],q.S[q.j],(q.S[q.i]+q.S[q.j])%256,K[n-1]])}
+  tb=tbl(['#','i','j','S[i] sesudah swap','S[j] sesudah swap','t','K'],r);
+ }else{
+  if(!fr)return '';
+  const enc=page==10,a=fr-1,A=enc?P[a]:C[a],B=K[a],R=A^B;
+  t=`<b>Byte ${fr}</b><br>${enc?'P':'C'} = ${cc(A)} (${A}) <br>K = ${B} <br>Hasil XOR = ${R} (hex ${R.toString(16).padStart(2,'0')}) = <b>${cc(R)}</b>`+bt(A,B,enc);
+  const r=[];for(let n=0;n<fr;n++)r.push([n+1,cc(P[n]),P[n],`<code>${bin(P[n])}</code>`,K[n],`<code>${bin(K[n])}</code>`,C[n],`<code>${bin(C[n])}</code>`,C[n].toString(16).padStart(2,'0')]);
+  tb=tbl(['#','P','P (dec)','P (biner)','K (dec)','K (biner)','C (dec)','C (biner)','C (hex)'],r);
+ }
+ return `<div class="pn dp"><h4>Detail Proses</h4>${g}<div class="ds">${t}</div>${tb}</div>`;
+}
+function tick(){$('tm').textContent=Math.floor((Date.now()-t0)/1000)+' Seconds'}
+function dirty(){goDone=false;$('nx').disabled=true;document.querySelectorAll('.bar').forEach(b=>b.innerHTML='')}
+function go(){
+ const k=$('k').value,p=$('p').value,bad=s=>/[^\x20-\x7e]/.test(s),er=$('er');
+ if(!k.length||k.length>256)return er.textContent='Key harus 1–256 karakter.';
+ if(!p.length||p.length>64)return er.textContent='Plaintext harus 1–64 karakter.';
+ if(bad(k)||bad(p))return er.textContent='Gunakan karakter ASCII biasa saja.';
+ keyV=k;ptV=p;goDone=true;comp();draw();
+}
+function stop(){pl=false;clearTimeout(tmo)}
+function dly(){return page==7?sp/2:page==8?(TL[Math.max(0,fr-1)].it<3?sp*12:sp):sp*12}
+function loop(){clearTimeout(tmo);if(!pl)return;if(fr<maxF()){fr++;draw();tmo=setTimeout(loop,dly())}else{pl=false;draw()}}
+function tp(){if(pl)stop();else{if(fr>=maxF())fr=page==8?1:0;pl=true;loop()}draw()}
+function rs(){stop();fr=0;if(page==8)kst='ready';draw();if(page==7||page>=9){pl=true;tmo=setTimeout(loop,300);draw()}}
+function stp(d){stop();fr=Math.max(page==8?1:0,Math.min(maxF(),fr+d));draw()}
+function en(){stop();fr=maxF();draw()}
+function startK(){kst='run';fr=0;pl=true;draw();tmo=setTimeout(loop,300)}
+function nav(d){
+ stop();page=Math.max(1,Math.min(11,page+d));fr=0;sc={};kst='init';draw();
+ if(page==8)tmo=setTimeout(()=>{kst='ready';draw()},1300);
+ else if(page>=7){pl=true;draw();tmo=setTimeout(loop,400)}
+}
+comp();draw();setInterval(tick,1000);
+</script></body></html>
